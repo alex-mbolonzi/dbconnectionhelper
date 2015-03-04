@@ -62,6 +62,11 @@ public class TransferB2CDAO {
     	    
             log.debug("Query : " + logMpaymentReqProc);
             
+//            log.info("Server name : " + transaction.getServerName() + 
+//            		" dest acc " + transaction.getDestAccount() + 
+//            		" amount " + transaction.getAmount() + 
+//            		" trx code " + transaction.getTrxCode());
+            
          // Step-4: register output parameters ...
 		    cs.setString(1, transaction.getServerName());
 		    cs.setString(2, date.toString());

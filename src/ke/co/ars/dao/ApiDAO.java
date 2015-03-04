@@ -178,4 +178,132 @@ public class ApiDAO {
         return apiDetails;
     }
 
+    public ApiInfo getApiDetailsOfTransaction(Transfer mpesaTimeoutTransfer) {
+
+        log.info("getApiDetailsOfTransaction()....");
+        
+        ApiInfo apiTransactionDetails;
+
+        Connection conn = null;
+
+        String getApiInfoByTrxIDProc = "{ call get_mpesa_api_details_by_transaction_id(?,?,?,?,?,?,?,?,?,?,"
+          		+ "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) }";
+
+        log.debug("Query : " + getApiInfoByTrxIDProc);
+        
+        try {
+
+            log.info("Opening DB connection...");
+            
+            conn = ConnectionHelper.getConnection();
+            
+         // Step-3: prepare the callable statement
+		    CallableStatement cs = conn.prepareCall(getApiInfoByTrxIDProc);
+		    
+		    cs.setString(1,mpesaTimeoutTransfer.getTrxCode());
+		    cs.registerOutParameter(2, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(3, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(4, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(5, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(6, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(7, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(8, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(9, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(10, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(11, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(12, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(13, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(14, java.sql.Types.INTEGER);
+		    cs.registerOutParameter(15, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(16, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(17, java.sql.Types.INTEGER);
+		    cs.registerOutParameter(18, java.sql.Types.INTEGER);
+		    cs.registerOutParameter(19, java.sql.Types.INTEGER);
+		    cs.registerOutParameter(20, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(21, java.sql.Types.INTEGER);
+		    cs.registerOutParameter(22, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(23, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(24, java.sql.Types.INTEGER);
+		    cs.registerOutParameter(25, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(26, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(27, java.sql.Types.INTEGER);
+		    cs.registerOutParameter(28, java.sql.Types.INTEGER);
+		    cs.registerOutParameter(29, java.sql.Types.INTEGER);
+		    cs.registerOutParameter(30, java.sql.Types.VARCHAR);
+		    cs.registerOutParameter(31, java.sql.Types.VARCHAR);
+		    
+		 // Step-5: execute the stored procedures: 
+		    cs.execute();
+            
+		    int sqlState = cs.getInt("mpesa_sql_state");
+		    
+		    switch(sqlState){
+	    	case 0:
+	    		// Step-6: extract the output parameters
+			    apiTransactionDetails = new ApiInfo();
+	                 
+			    apiTransactionDetails.setSp_id(cs.getString("mpesa_sp_id"));
+			    apiTransactionDetails.setSp_password(cs.getString("mpesa_sp_password"));
+			    apiTransactionDetails.setService_id(cs.getString("mpesa_service_id"));
+			    apiTransactionDetails.setCommand_id(cs.getString("mpesa_command_id"));
+			    apiTransactionDetails.setLanguage_code(cs.getString("mpesa_language_code"));
+			    apiTransactionDetails.setQueue_timeout_url(cs.getString("mpesa_queue_timeout_url"));
+			    apiTransactionDetails.setThird_party_id(cs.getString("mpesa_third_party_id"));
+			    apiTransactionDetails.setCaller_password(cs.getString("mpesa_caller_password"));
+			    apiTransactionDetails.setCheck_sum(cs.getString("mpesa_check_sum"));
+			    apiTransactionDetails.setResult_url(cs.getString("mpesa_result_url"));
+			    apiTransactionDetails.setRequestUrl(cs.getString("mpesa_request_url"));
+			    apiTransactionDetails.setQueryTrxUrl(cs.getString("mpesa_query_trx_url"));
+			    apiTransactionDetails.setIdentifier(String.valueOf(cs.getInt("mpesa_identifier")));
+			    apiTransactionDetails.setInitiator_password(cs.getString("mpesa_initiator_password"));
+			    apiTransactionDetails.setShort_code(cs.getString("mpesa_short_code"));
+			    apiTransactionDetails.setPrimary_party_id(cs.getInt("mpesa_primary_party_id"));
+			    apiTransactionDetails.setReceiver_id(cs.getInt("mpesa_receiver_id"));
+			    apiTransactionDetails.setAccess_id(cs.getInt("mpesa_access_id"));
+			    apiTransactionDetails.setAccess_identifier(cs.getString("mpesa_access_identifier"));
+			    apiTransactionDetails.setKey_owner(cs.getInt("mpesa_key_owner"));
+			    apiTransactionDetails.setKey_store(cs.getString("mpesa_key_store"));
+			    apiTransactionDetails.setKey_store_password(cs.getString("mpesa_key_store_password"));
+			    apiTransactionDetails.setCallerType(cs.getInt("mpesa_caller_type"));
+			    apiTransactionDetails.setTrust_store(cs.getString("mpesa_trust_store"));
+			    apiTransactionDetails.setTrust_store_password(cs.getString("mpesa_trust_store_password"));
+			    apiTransactionDetails.setIdentifierType(cs.getInt("mpesa_identifier_type"));
+			    apiTransactionDetails.setTimeout(cs.getInt("mpesa_timeout"));
+			    apiTransactionDetails.setISOServerIP(cs.getString("mpesa_host_ip"));
+			    apiTransactionDetails.setISOServerPort(Integer.valueOf(cs.getString("mpesa_host_port")));
+			    apiTransactionDetails.setStatusCode(0);
+			    
+	    	break;	
+	    	case 23000:
+	    		
+	    		apiTransactionDetails = new ApiInfo();
+	    		
+	    		apiTransactionDetails.setStatusCode(94);
+	    		
+	    	break;
+	    	default:
+	    		
+	    		apiTransactionDetails = new ApiInfo();
+	    		
+	    		apiTransactionDetails.setStatusCode(95);
+	    		
+	    	break;
+	    	}
+		 
+		    
+
+        } catch (SQLException e) {
+            
+//            e.printStackTrace();
+            log.error("Exception: ",e.fillInStackTrace());
+            throw new RuntimeException(e);
+        } finally {
+            
+            log.info("Closing DB connection...");
+            
+            ConnectionHelper.close(conn);
+        }
+
+        return apiTransactionDetails;
+    }
 }
